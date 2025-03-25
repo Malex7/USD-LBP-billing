@@ -33,7 +33,7 @@ def calculate_split_change(bill_usd, paid_usd, paid_lbp, exchange_rate):
         return "✅ Payment is exact. No change owed."
 
 # Streamlit UI
-st.title("💵 USD/LBP Mixed Payment POS Calculator")
+st.title("💵 USD/LBP Mixed Payment Calculator")
 
 exchange_rate = st.number_input("Exchange rate (LBP per 1 USD)", value=89000)
 currency = st.selectbox("Currency of the bill", ["USD", "LBP"])
