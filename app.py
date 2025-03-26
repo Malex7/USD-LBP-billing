@@ -118,7 +118,7 @@ st.markdown(f"""
     <h1 style='text-align: center;'>{TEXT['title'][lang]}</h1>
 """, unsafe_allow_html=True)
 
-with stylable_container("exchange_box", css="padding: 1rem; background-color: #f9f9f9; border-radius: 1rem; margin-bottom: 1rem;"):
+with stylable_container(key="exchange_box", css="padding: 1rem; background-color: #f9f9f9; border-radius: 1rem; margin-bottom: 1rem;"):
     exchange_rate = st.number_input(TEXT["exchange_rate"][lang], value=89000, step=1000)
 
 with stylable_container("bill_info", css="padding: 1rem; background-color: #f0f4ff; border-radius: 1rem; margin-bottom: 1rem;"):
