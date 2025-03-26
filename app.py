@@ -4,7 +4,10 @@ from streamlit_extras.stylable_container import stylable_container
 st.set_page_config(page_title="USD/LBP Calculator", page_icon="💵", layout="wide")
 
 # --- Language toggle ---
-lang = st.selectbox("🌐 Language / Langue / اللغة", ["English", "Français", "العربية"])
+with st.container():
+    col1, col2 = st.columns([8, 1])
+    with col2:
+        lang = st.selectbox("", ["English", "Français", "العربية"], index=0, label_visibility="collapsed")
 
 # --- Arabic RTL support ---
 if lang == "العربية":
@@ -89,3 +92,4 @@ TEXT = {
 # So LBP total appears before percentage as requested.
 
 # ✅ You can now keep the Calculate button active even if bill = 0.
+
