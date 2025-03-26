@@ -183,5 +183,6 @@ with col1:
                 if lang == "العربية":
                     st.markdown(f"- 💵 {format_currency(per_lbp, 'LBP')} و {format_currency(per_usd, 'USD')} (**أو {format_currency(full_lbp, 'LBP')}**)")
                 else:
-                    st.markdown(f"- 💵 {format_currency(per_usd, 'USD')} and {format_currency(per_lbp, 'LBP')} (OR {format_currency(full_lbp, 'LBP')})")
+                    st.markdown(f"- 💵 **{format_currency(per_usd, 'USD')} and {format_currency(per_lbp, 'LBP')}** (OR {format_currency(full_lbp, 'LBP')})")
+
                 st.markdown(f"- 📊 {TEXT['share'][lang]}: **{percentage}%**")
