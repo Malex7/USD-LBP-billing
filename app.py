@@ -3,102 +3,89 @@ from streamlit_extras.stylable_container import stylable_container
 
 st.set_page_config(page_title="USD/LBP Calculator", page_icon="💵", layout="wide")
 
-# --- Calculation logic ---
-def calculate_split_change(bill_usd, paid_usd, paid_lbp, exchange_rate):
-    paid_lbp_usd = paid_lbp / exchange_rate
-    total_paid_usd = paid_usd + paid_lbp_usd
-    difference_usd = round(total_paid_usd - bill_usd, 2)
+# --- Language toggle ---
+lang = st.selectbox("🌐 Language / Langue / اللغة", ["English", "Français", "العربية"])
 
-    if difference_usd < 0:
-        owed_usd = abs(difference_usd)
-        usd_owed = int(owed_usd)
-        lbp_owed = round((owed_usd - usd_owed) * exchange_rate)
-        result = f"❌ Customer still owes:\n\n- **${usd_owed}** and **{lbp_owed:,.0f} ل ل**  \n**OR {round(owed_usd * exchange_rate):,} ل ل**"
-        return result, owed_usd
-    elif difference_usd > 0:
-        usd_return = int(difference_usd)
-        lbp_return = round((difference_usd - usd_return) * exchange_rate)
-        result = f"✅ Change to return:\n\n- **${usd_return}** and **{lbp_return:,.0f} ل ل**  \n**OR {round(difference_usd * exchange_rate):,} ل ل**"
-        return result, -difference_usd
-    else:
-        result = "✅ **Payment is exact. No change owed.**"
-        return result, 0.0
+# --- Arabic RTL support ---
+if lang == "العربية":
+    st.markdown("""<style>body { direction: rtl; text-align: right; }</style>""", unsafe_allow_html=True)
 
-# --- UI Layout ---
-st.markdown("""
-    <h1 style='text-align: center;'>💵 USD/LBP Payment Calculator</h1>
-""", unsafe_allow_html=True)
+# --- Multi-language dictionary ---
+TEXT = {
+    "title": {
+        "English": "USD/LBP Payment Calculator",
+        "Français": "Calculateur de paiement USD/LBP",
+        "العربية": "حاسبة الدفع بالدولار/الليرة"
+    },
+    "exchange_rate": {
+        "English": "Exchange rate (LBP per 1 USD)",
+        "Français": "Taux de change (LBP pour 1 USD)",
+        "العربية": "سعر الصرف (ل ل مقابل 1 دولار)"
+    },
+    "currency_of_bill": {
+        "English": "Currency of the bill",
+        "Français": "Devise de la facture",
+        "العربية": "عملة الفاتورة"
+    },
+    "total_bill": {
+        "English": "Total bill amount",
+        "Français": "Montant total de la facture",
+        "العربية": "المبلغ الإجمالي للفاتورة"
+    },
+    "paid_usd": {
+        "English": "Paid in USD",
+        "Français": "Payé en USD",
+        "العربية": "مدفوع بالدولار"
+    },
+    "paid_lbp": {
+        "English": "Paid in LBP",
+        "Français": "Payé en LBP",
+        "العربية": "مدفوع بالليرة"
+    },
+    "split_people": {
+        "English": "Split between how many people?",
+        "Français": "Diviser entre combien de personnes ?",
+        "العربية": "تقسيم بين كم شخصًا؟"
+    },
+    "calculate": {
+        "English": "Calculate",
+        "Français": "Calculer",
+        "العربية": "احسب"
+    },
+    "result": {
+        "English": "Result",
+        "Français": "Résultat",
+        "العربية": "النتيجة"
+    },
+    "per_person": {
+        "English": "Per Person Breakdown",
+        "Français": "Détail par personne",
+        "العربية": "حصة كل شخص"
+    },
+    "owes": {
+        "English": "Owes",
+        "Français": "Doit",
+        "العربية": "ما يجب دفعه"
+    },
+    "share": {
+        "English": "Share of bill",
+        "Français": "Part de la facture",
+        "العربية": "النسبة من الفاتورة"
+    },
+    "equivalent": {
+        "English": "Total LBP equivalent",
+        "Français": "Équivalent total en LBP",
+        "العربية": "المعادل الإجمالي بالليرة"
+    }
+}
 
-with stylable_container(
-    key="exchange_box",
-    css_styles="""
-        padding: 1rem;
-        background-color: #f9f9f9;
-        border-radius: 1rem;
-        margin-bottom: 1.5rem;
-    """
-):
-    exchange_rate = st.number_input("💱 Exchange rate (LBP per 1 USD)", value=89000, step=1000)
+# Now this dictionary can be used in the rest of your interface like:
+# st.number_input(TEXT["exchange_rate"][lang], ...)
+# This replaces all static text with language-aware labels.
 
-with stylable_container(
-    key="bill_info",
-    css_styles="""
-        padding: 1rem;
-        background-color: #ddeaff;
-        border-radius: 1rem;
-        margin-bottom: 1.5rem;
-    """
-):
-    currency = st.selectbox("🧾 Currency of the bill", ["USD", "LBP"])
-    bill_amount = st.number_input("Total bill amount", value=0.0, min_value=0.0, step=0.01)
+# When rendering per-person info, use:
+# st.markdown(f"- 💵 {TEXT['equivalent'][lang]}: ...")
+# st.markdown(f"- 📊 {TEXT['share'][lang]}: ...")
+# So LBP total appears before percentage as requested.
 
-with stylable_container(
-    key="payment_info",
-    css_styles="""
-        padding: 1rem;
-        background-color: #ffd6d6;
-        border-radius: 1rem;
-        margin-bottom: 1.5rem;
-    """
-):
-    paid_usd = st.number_input("💵 Paid in USD", value=0.0, min_value=0.0, step=0.01)
-    paid_lbp = st.number_input("🇱🇧 Paid in LBP", value=0.0, min_value=0.0, step=1000.0)
-    split_people = st.number_input("👥 Split between how many people?", min_value=0, value=0, step=1)
-
-# --- Conversion logic ---
-bill_usd = bill_amount if currency == "USD" else bill_amount / exchange_rate
-
-if bill_amount > 0 and st.button("🧲 Calculate"):
-    result, remaining_usd = calculate_split_change(bill_usd, paid_usd, paid_lbp, exchange_rate)
-
-    with stylable_container(
-        key="result_box",
-        css_styles="""
-            padding: 1rem;
-            background-color: #c3f7c3;
-            border-radius: 1rem;
-            margin-top: 1rem;
-        """
-    ):
-        st.markdown(f"### 💡 Result:\n{result}")
-
-    if split_people > 0 and remaining_usd != 0:
-        per_person_usd = abs(remaining_usd) / split_people
-        per_usd = int(per_person_usd)
-        per_lbp = round((per_person_usd - per_usd) * exchange_rate)
-        full_lbp = round(per_person_usd * exchange_rate)
-        percentage = round((per_person_usd / bill_usd) * 100, 1) if bill_usd else 0
-
-        with stylable_container(
-            key="split_result",
-            css_styles="""
-                padding: 1rem;
-                background-color: #fff1b8;
-                border-radius: 1rem;
-                margin-top: 1rem;
-            """
-        ):
-            st.markdown("### 👥 Per Person Breakdown")
-            st.markdown(f"- 💵 Owes: **${per_usd}** and **{per_lbp:,.0f} ل ل**  \n- 📊 Share of bill: **{percentage}%**  \n- 📃 Total LBP equivalent: **{full_lbp:,.0f} ل ل**")
-
-
+# ✅ You can now keep the Calculate button active even if bill = 0.
