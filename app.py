@@ -114,8 +114,6 @@ def format_currency(amount, code):
     symbol = CURRENCY[code][lang]
     if lang == "العربية":
         return f"{amount:,} {symbol}"
-    elif lang == "Français":
-        return f"{amount:,} {symbol}"
     else:
         return f"{symbol} {amount:,}"
 
@@ -131,9 +129,13 @@ def calculate_split_change(bill_usd, paid_usd, paid_lbp, exchange_rate):
         full_lbp = round(owed_usd * exchange_rate)
 
         if lang == "العربية":
-            result = f"❌ {TEXT['owes'][lang]}:\n\n- **{format_currency(lbp_owed, 'LBP')}** و **{format_currency(usd_owed, 'USD')}**\n- **أو {format_currency(full_lbp, 'LBP')}**"
+            result = f"❌ {TEXT['owes'][lang]}:
+
+- **{format_currency(lbp_owed, 'LBP')}** و **{format_currency(usd_owed, 'USD')}** (**أو {format_currency(full_lbp, 'LBP')}**)"
         else:
-            result = f"❌ {TEXT['owes'][lang]}:\n\n- **{format_currency(usd_owed, 'USD')}** and **{format_currency(lbp_owed, 'LBP')}**\n- **OR {format_currency(full_lbp, 'LBP')}**"
+            result = f"❌ {TEXT['owes'][lang]}:
+
+- **{format_currency(usd_owed, 'USD')} and {format_currency(lbp_owed, 'LBP')}** (OR {format_currency(full_lbp, 'LBP')})"
         return result, owed_usd
 
     elif difference_usd > 0:
@@ -142,9 +144,13 @@ def calculate_split_change(bill_usd, paid_usd, paid_lbp, exchange_rate):
         full_lbp = round(difference_usd * exchange_rate)
 
         if lang == "العربية":
-            result = f"✅ {TEXT['change_return'][lang]}:\n\n- **{format_currency(lbp_return, 'LBP')}** و **{format_currency(usd_return, 'USD')}**\n- **أو {format_currency(full_lbp, 'LBP')}**"
+            result = f"✅ {TEXT['change_return'][lang]}:
+
+- **{format_currency(lbp_return, 'LBP')}** و **{format_currency(usd_return, 'USD')}** (**أو {format_currency(full_lbp, 'LBP')}**)"
         else:
-            result = f"✅ {TEXT['change_return'][lang]}:\n\n- **{format_currency(usd_return, 'USD')}** and **{format_currency(lbp_return, 'LBP')}**\n- **OR {format_currency(full_lbp, 'LBP')}**"
+            result = f"✅ {TEXT['change_return'][lang]}:
+
+- **{format_currency(usd_return, 'USD')} and {format_currency(lbp_return, 'LBP')}** (OR {format_currency(full_lbp, 'LBP')})"
         return result, -difference_usd
 
     else:
@@ -167,21 +173,31 @@ with stylable_container("payment_box", css_styles="padding: 1rem; background-col
 
 bill_usd = bill_amount if currency == "USD" else bill_amount / exchange_rate
 
-if st.button(TEXT["calculate"][lang]):
-    result, remaining_usd = calculate_split_change(bill_usd, paid_usd, paid_lbp, exchange_rate)
+col1, col2 = st.columns(2)
 
-    with stylable_container("result_box", css_styles="padding: 1rem; background-color: #eafbe7; border-radius: 1rem; margin-top: 1rem;"):
-        st.markdown(f"### 💡 {TEXT['result'][lang]}:\n{result}")
+with col1:
+    if st.button(TEXT["calculate"][lang]):
+        result, remaining_usd = calculate_split_change(bill_usd, paid_usd, paid_lbp, exchange_rate)
 
-    if split_people > 0:
-        per_person_usd = abs(remaining_usd) / split_people
-        per_usd = int(per_person_usd)
-        per_lbp = round((per_person_usd - per_usd) * exchange_rate)
-        full_lbp = round(per_person_usd * exchange_rate)
-        percentage = round((per_person_usd / bill_usd) * 100, 2) if bill_usd > 0 else 0
+        with stylable_container("result_box", css_styles="padding: 1rem; background-color: #eafbe7; border-radius: 1rem; margin-top: 1rem;"):
+            st.markdown(f"### 💡 {TEXT['result'][lang]}:
+{result}")
 
-        with stylable_container("person_breakdown_box", css_styles="padding: 1rem; background-color: #fef7e0; border-radius: 1rem; margin-top: 1rem;"):
-            st.markdown(f"### 👥 {TEXT['per_person'][lang]}:")
-            st.markdown(f"- 💵 {format_currency(per_lbp, 'LBP')} و {format_currency(per_usd, 'USD')}" if lang == "العربية" else f"- 💵 {format_currency(per_usd, 'USD')} and {format_currency(per_lbp, 'LBP')}")
-            st.markdown(f"- 📊 {TEXT['equivalent'][lang]}: {format_currency(full_lbp, 'LBP')}")
-            st.markdown(f"- 📊 {TEXT['share'][lang]}: **{percentage}%**")
+        if split_people > 0:
+            per_person_usd = abs(remaining_usd) / split_people
+            per_usd = int(per_person_usd)
+            per_lbp = round((per_person_usd - per_usd) * exchange_rate)
+            full_lbp = round(per_person_usd * exchange_rate)
+            percentage = round((per_person_usd / bill_usd) * 100, 2) if bill_usd > 0 else 0
+
+            with stylable_container("person_breakdown_box", css_styles="padding: 1rem; background-color: #fef7e0; border-radius: 1rem; margin-top: 1rem;"):
+                st.markdown(f"### 👥 {TEXT['per_person'][lang]}:")
+                if lang == "العربية":
+                    st.markdown(f"- 💵 {format_currency(per_lbp, 'LBP')} و {format_currency(per_usd, 'USD')} (**أو {format_currency(full_lbp, 'LBP')}**)" )
+                else:
+                    st.markdown(f"- 💵 {format_currency(per_usd, 'USD')} and {format_currency(per_lbp, 'LBP')} (OR {format_currency(full_lbp, 'LBP')})")
+                st.markdown(f"- 📊 {TEXT['share'][lang]}: **{percentage}%**")
+
+with col2:
+    if st.button("🔄 Refresh"):
+        st.experimental_rerun()
