@@ -131,7 +131,8 @@ def calculate_split_change(bill_usd, paid_usd, paid_lbp, exchange_rate):
         if lang == "العربية":
             result = f"❌ {TEXT['owes'][lang]}:
 
-"- **{format_currency(lbp_owed, 'LBP')}** و **{format_currency(usd_owed, 'USD')}** (**أو {format_currency(full_lbp, 'LBP')}**)"
+
+""- **{format_currency(lbp_owed, 'LBP')}** و **{format_currency(usd_owed, 'USD')}** (**أو {format_currency(full_lbp, 'LBP')}**)"
         else:
             result = f"❌ {TEXT['owes'][lang]}:
 
@@ -146,7 +147,8 @@ def calculate_split_change(bill_usd, paid_usd, paid_lbp, exchange_rate):
         if lang == "العربية":
             result = f"✅ {TEXT['change_return'][lang]}:
 
-- **{format_currency(lbp_return, 'LBP')}** و **{format_currency(usd_return, 'USD')}** (**أو {format_currency(full_lbp, 'LBP')}**)"
+
+"- **{format_currency(lbp_return, 'LBP')}** و **{format_currency(usd_return, 'USD')}** (**أو {format_currency(full_lbp, 'LBP')}**)"
         else:
             result = f"✅ {TEXT['change_return'][lang]}:
 
@@ -201,4 +203,3 @@ with col1:
 with col2:
     if st.button("🔄 Refresh"):
         st.experimental_rerun()
-
