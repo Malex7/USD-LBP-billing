@@ -3,21 +3,38 @@ from streamlit_extras.stylable_container import stylable_container
 
 st.set_page_config(page_title="USD/LBP Calculator", page_icon="💵", layout="wide")
 
-# --- Language toggle ---
-with st.container():
-    col1, col2 = st.columns([8, 1])
-    with col2:
-        lang = st.selectbox("", ["English", "Français", "العربية"], index=0, label_visibility="collapsed", key="language_select")
+# --- Language + flag toggle ---
+LANG_OPTIONS = {
+    "🇺🇸 English": "English",
+    "🇫🇷 Français": "Français",
+    "🇱🇧 العربية": "العربية"
+}
+lang_label = st.selectbox("", list(LANG_OPTIONS.keys()), index=0, label_visibility="collapsed")
+lang = LANG_OPTIONS[lang_label]
 
-# --- Arabic RTL support ---
+# --- RTL Support ---
 if lang == "العربية":
     st.markdown("""<style>body { direction: rtl; text-align: right; }</style>""", unsafe_allow_html=True)
+
+# --- Currency labels by language ---
+CURRENCY = {
+    "USD": {
+        "English": "USD",
+        "Français": "USD",
+        "العربية": "دولار"
+    },
+    "LBP": {
+        "English": "LBP",
+        "Français": "LL",
+        "العربية": "ل.ل"
+    }
+}
 
 # --- Multi-language dictionary ---
 TEXT = {
     "title": {
         "English": "USD/LBP Payment Calculator",
-        "Français": "Calculateur de paiement USD/LBP",
+        "Français": "Calculateur de paiement USD/LL",
         "العربية": "حاسبة الدفع بالدولار/الليرة"
     },
     "exchange_rate": {
@@ -93,6 +110,15 @@ TEXT = {
 }
 
 # --- Calculation logic ---
+def format_currency(amount, code):
+    symbol = CURRENCY[code][lang]
+    if lang == "العربية":
+        return f"{amount:,} {symbol}"
+    elif lang == "Français":
+        return f"{amount:,} {symbol}"
+    else:
+        return f"{symbol} {amount:,}"
+
 def calculate_split_change(bill_usd, paid_usd, paid_lbp, exchange_rate):
     paid_lbp_usd = paid_lbp / exchange_rate
     total_paid_usd = paid_usd + paid_lbp_usd
@@ -102,43 +128,39 @@ def calculate_split_change(bill_usd, paid_usd, paid_lbp, exchange_rate):
         owed_usd = abs(difference_usd)
         usd_owed = int(owed_usd)
         lbp_owed = round((owed_usd - usd_owed) * exchange_rate)
-        result = f"❌ {TEXT['owes'][lang]}:\n\n- **{usd_owed} USD** and **{lbp_owed:,} ل.ل**  \n**OR {round(owed_usd * exchange_rate):,} ل.ل**"
+        full_lbp = round(owed_usd * exchange_rate)
+
+        if lang == "العربية":
+            result = f"❌ {TEXT['owes'][lang]}:\n\n- **{format_currency(lbp_owed, 'LBP')}** و **{format_currency(usd_owed, 'USD')}**\n- **أو {format_currency(full_lbp, 'LBP')}**"
+        else:
+            result = f"❌ {TEXT['owes'][lang]}:\n\n- **{format_currency(usd_owed, 'USD')}** and **{format_currency(lbp_owed, 'LBP')}**\n- **OR {format_currency(full_lbp, 'LBP')}**"
         return result, owed_usd
+
     elif difference_usd > 0:
         usd_return = int(difference_usd)
         lbp_return = round((difference_usd - usd_return) * exchange_rate)
-        result = f"✅ {TEXT['change_return'][lang]}:\n\n- **{usd_return} USD** and **{lbp_return:,} ل.ل**  \n**OR {round(difference_usd * exchange_rate):,} ل.ل**"
+        full_lbp = round(difference_usd * exchange_rate)
+
+        if lang == "العربية":
+            result = f"✅ {TEXT['change_return'][lang]}:\n\n- **{format_currency(lbp_return, 'LBP')}** و **{format_currency(usd_return, 'USD')}**\n- **أو {format_currency(full_lbp, 'LBP')}**"
+        else:
+            result = f"✅ {TEXT['change_return'][lang]}:\n\n- **{format_currency(usd_return, 'USD')}** and **{format_currency(lbp_return, 'LBP')}**\n- **OR {format_currency(full_lbp, 'LBP')}**"
         return result, -difference_usd
+
     else:
-        result = f"✅ **{TEXT['payment_exact'][lang]}**"
-        return result, 0.0
+        return f"✅ **{TEXT['payment_exact'][lang]}**", 0.0
 
 # --- UI Layout ---
 st.markdown(f"<h1 style='text-align: center;'>{TEXT['title'][lang]}</h1>", unsafe_allow_html=True)
 
-with stylable_container("exchange_box", css_styles="""
-    padding: 1rem;
-    background-color: #f9f9f9;
-    border-radius: 1rem;
-    margin-bottom: 1rem;
-"""):
+with stylable_container("exchange_box", css_styles="padding: 1rem; background-color: #f9f9f9; border-radius: 1rem; margin-bottom: 1rem;"):
     exchange_rate = st.number_input(TEXT["exchange_rate"][lang], value=89000, step=1000)
 
-with stylable_container("currency_box", css_styles="""
-    padding: 1rem;
-    background-color: #f0f4ff;
-    border-radius: 1rem;
-    margin-bottom: 1rem;
-"""):
+with stylable_container("currency_box", css_styles="padding: 1rem; background-color: #f0f4ff; border-radius: 1rem; margin-bottom: 1rem;"):
     currency = st.selectbox(TEXT["currency_of_bill"][lang], ["USD", "LBP"])
     bill_amount = st.number_input(TEXT["total_bill"][lang], value=0.0, step=0.01)
 
-with stylable_container("payment_box", css_styles="""
-    padding: 1rem;
-    background-color: #fff0f0;
-    border-radius: 1rem;
-    margin-bottom: 1rem;
-"""):
+with stylable_container("payment_box", css_styles="padding: 1rem; background-color: #fff0f0; border-radius: 1rem; margin-bottom: 1rem;"):
     paid_usd = st.number_input(TEXT["paid_usd"][lang], value=0.0, step=0.01)
     paid_lbp = st.number_input(TEXT["paid_lbp"][lang], value=0.0, step=1000.0)
     split_people = st.number_input(TEXT["split_people"][lang], min_value=0, value=0, step=1)
@@ -148,12 +170,7 @@ bill_usd = bill_amount if currency == "USD" else bill_amount / exchange_rate
 if st.button(TEXT["calculate"][lang]):
     result, remaining_usd = calculate_split_change(bill_usd, paid_usd, paid_lbp, exchange_rate)
 
-    with stylable_container("result_box", css_styles="""
-        padding: 1rem;
-        background-color: #eafbe7;
-        border-radius: 1rem;
-        margin-top: 1rem;
-    """):
+    with stylable_container("result_box", css_styles="padding: 1rem; background-color: #eafbe7; border-radius: 1rem; margin-top: 1rem;"):
         st.markdown(f"### 💡 {TEXT['result'][lang]}:\n{result}")
 
     if split_people > 0:
@@ -163,13 +180,8 @@ if st.button(TEXT["calculate"][lang]):
         full_lbp = round(per_person_usd * exchange_rate)
         percentage = round((per_person_usd / bill_usd) * 100, 2) if bill_usd > 0 else 0
 
-        with stylable_container("person_breakdown_box", css_styles="""
-            padding: 1rem;
-            background-color: #fef7e0;
-            border-radius: 1rem;
-            margin-top: 1rem;
-        """):
+        with stylable_container("person_breakdown_box", css_styles="padding: 1rem; background-color: #fef7e0; border-radius: 1rem; margin-top: 1rem;"):
             st.markdown(f"### 👥 {TEXT['per_person'][lang]}:")
-            st.markdown(f"- 💵 **{per_usd} USD** and **{per_lbp:,} ل.ل**")
-            st.markdown(f"- 📊 {TEXT['equivalent'][lang]}: **{full_lbp:,} ل.ل**")
+            st.markdown(f"- 💵 {format_currency(per_lbp, 'LBP')} و {format_currency(per_usd, 'USD')}" if lang == "العربية" else f"- 💵 {format_currency(per_usd, 'USD')} and {format_currency(per_lbp, 'LBP')}")
+            st.markdown(f"- 📊 {TEXT['equivalent'][lang]}: {format_currency(full_lbp, 'LBP')}")
             st.markdown(f"- 📊 {TEXT['share'][lang]}: **{percentage}%**")
