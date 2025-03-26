@@ -22,7 +22,7 @@ TEXT = {
     },
     "exchange_rate": {
         "English": "Exchange rate (LBP per 1 USD)",
-        "Français": "Taux de change (LBP pour 1 USD)",
+        "Français": "Taux de change (LL pour 1 USD)",
         "العربية": "سعر الصرف (ل.ل مقابل 1 دولار)"
     },
     "currency_of_bill": {
@@ -42,7 +42,7 @@ TEXT = {
     },
     "paid_lbp": {
         "English": "Paid in LBP",
-        "Français": "Payé en LBP",
+        "Français": "Payé en LL",
         "العربية": "مدفوع بالليرة"
     },
     "split_people": {
@@ -87,7 +87,7 @@ TEXT = {
     },
     "equivalent": {
         "English": "Total LBP equivalent",
-        "Français": "Équivalent total en LBP",
+        "Français": "Équivalent total en LL",
         "العربية": "المعادل الإجمالي بالليرة"
     }
 }
@@ -118,24 +118,24 @@ st.markdown(f"""
     <h1 style='text-align: center;'>{TEXT['title'][lang]}</h1>
 """, unsafe_allow_html=True)
 
-with stylable_container(key="exchange_box", css="padding: 1rem; background-color: #f9f9f9; border-radius: 1rem; margin-bottom: 1rem;"):
-    exchange_rate = st.number_input(TEXT["exchange_rate"][lang], value=89000, step=1000, key="exchange_rate")
+with stylable_container(css="padding: 1rem; background-color: #f9f9f9; border-radius: 1rem; margin-bottom: 1rem;"):
+    exchange_rate = st.number_input(TEXT["exchange_rate"][lang], value=89000, step=1000)
 
-with stylable_container(key="bill_info", css="padding: 1rem; background-color: #f0f4ff; border-radius: 1rem; margin-bottom: 1rem;"):
-    currency = st.selectbox(TEXT["currency_of_bill"][lang], ["USD", "LBP"], key="currency")
-    bill_amount = st.number_input(TEXT["total_bill"][lang], value=0.0, step=0.01, key="bill_amount")
+with stylable_container(css="padding: 1rem; background-color: #f0f4ff; border-radius: 1rem; margin-bottom: 1rem;"):
+    currency = st.selectbox(TEXT["currency_of_bill"][lang], ["USD", "LBP"])
+    bill_amount = st.number_input(TEXT["total_bill"][lang], value=0.0, step=0.01)
 
-with stylable_container(key="payment_info", css="padding: 1rem; background-color: #fff0f0; border-radius: 1rem; margin-bottom: 1rem;"):
-    paid_usd = st.number_input(TEXT["paid_usd"][lang], value=0.0, step=0.01, key="paid_usd")
-    paid_lbp = st.number_input(TEXT["paid_lbp"][lang], value=0.0, step=1000.0, key="paid_lbp")
-    split_people = st.number_input(TEXT["split_people"][lang], min_value=0, value=0, step=1, key="split")
+with stylable_container(css="padding: 1rem; background-color: #fff0f0; border-radius: 1rem; margin-bottom: 1rem;"):
+    paid_usd = st.number_input(TEXT["paid_usd"][lang], value=0.0, step=0.01)
+    paid_lbp = st.number_input(TEXT["paid_lbp"][lang], value=0.0, step=1000.0)
+    split_people = st.number_input(TEXT["split_people"][lang], min_value=0, value=0, step=1)
 
 bill_usd = bill_amount if currency == "USD" else bill_amount / exchange_rate
 
-if st.button(TEXT["calculate"][lang], key="calculate_button"):
+if st.button(TEXT["calculate"][lang]):
     result, remaining_usd = calculate_split_change(bill_usd, paid_usd, paid_lbp, exchange_rate)
 
-    with stylable_container(key="result_box", css="padding: 1rem; background-color: #eafbe7; border-radius: 1rem; margin-top: 1rem;"):
+    with stylable_container(css="padding: 1rem; background-color: #eafbe7; border-radius: 1rem; margin-top: 1rem;"):
         st.markdown(f"### 💡 {TEXT['result'][lang]}:\n{result}")
 
     if split_people > 0:
@@ -145,8 +145,9 @@ if st.button(TEXT["calculate"][lang], key="calculate_button"):
         full_lbp = round(per_person_usd * exchange_rate)
         percentage = round((per_person_usd / bill_usd) * 100, 2) if bill_usd > 0 else 0
 
-        with stylable_container(key="split_result", css="padding: 1rem; background-color: #fef7e0; border-radius: 1rem; margin-top: 1rem;"):
+        with stylable_container(css="padding: 1rem; background-color: #fef7e0; border-radius: 1rem; margin-top: 1rem;"):
             st.markdown(f"### 👥 {TEXT['per_person'][lang]}:")
             st.markdown(f"- 💵 **{per_usd} USD** and **{per_lbp:,} ل.ل**")
             st.markdown(f"- 📊 {TEXT['equivalent'][lang]}: **{full_lbp:,} ل.ل**")
             st.markdown(f"- 📊 {TEXT['share'][lang]}: **{percentage}%**")
+
