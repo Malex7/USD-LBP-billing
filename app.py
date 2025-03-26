@@ -1,7 +1,5 @@
 import streamlit as st
 from streamlit_extras.stylable_container import stylable_container
-from streamlit.runtime.scriptrunner import RerunException
-from streamlit.runtime.scriptrunner import rerun
 
 st.set_page_config(page_title="USD/LBP Calculator", page_icon="💵", layout="wide")
 
@@ -188,6 +186,3 @@ with col1:
                     st.markdown(f"- 💵 {format_currency(per_usd, 'USD')} and {format_currency(per_lbp, 'LBP')} (OR {format_currency(full_lbp, 'LBP')})")
                 st.markdown(f"- 📊 {TEXT['share'][lang]}: **{percentage}%**")
 
-with col2:
-    if st.button("🔄 Refresh"):
-        raise RerunException(rerun())
