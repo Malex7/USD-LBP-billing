@@ -1,5 +1,7 @@
 import streamlit as st
 from streamlit_extras.stylable_container import stylable_container
+from streamlit.runtime.scriptrunner import RerunException
+from streamlit.runtime.scriptrunner import rerun
 
 st.set_page_config(page_title="USD/LBP Calculator", page_icon="💵", layout="wide")
 
@@ -18,16 +20,8 @@ if lang == "العربية":
 
 # --- Currency labels by language ---
 CURRENCY = {
-    "USD": {
-        "English": "USD",
-        "Français": "USD",
-        "العربية": "دولار"
-    },
-    "LBP": {
-        "English": "LBP",
-        "Français": "LL",
-        "العربية": "ل.ل"
-    }
+    "USD": {"English": "USD", "Français": "USD", "العربية": "دولار"},
+    "LBP": {"English": "LBP", "Français": "LL", "العربية": "ل.ل"}
 }
 
 # --- Multi-language dictionary ---
@@ -65,7 +59,7 @@ TEXT = {
     "split_people": {
         "English": "Split between how many people?",
         "Français": "Diviser entre combien de personnes ?",
-        "العربية": "تقسيم بين كم شخصًا؟"
+        "العربية": "على كم شخص سيتم تقسيم الفاتورة؟"
     },
     "calculate": {
         "English": "Calculate",
@@ -112,10 +106,7 @@ TEXT = {
 # --- Calculation logic ---
 def format_currency(amount, code):
     symbol = CURRENCY[code][lang]
-    if lang == "العربية":
-        return f"{amount:,} {symbol}"
-    else:
-        return f"{symbol} {amount:,}"
+    return f"{amount:,} {symbol}" if lang == "العربية" else f"{symbol} {amount:,}"
 
 def calculate_split_change(bill_usd, paid_usd, paid_lbp, exchange_rate):
     paid_lbp_usd = paid_lbp / exchange_rate
@@ -156,8 +147,8 @@ def calculate_split_change(bill_usd, paid_usd, paid_lbp, exchange_rate):
     else:
         return f"✅ **{TEXT['payment_exact'][lang]}**", 0.0
 
-# UI Layout
-st.markdown(f"<h1 style='text-align: center;'>" + TEXT['title'][lang] + "</h1>", unsafe_allow_html=True)
+# --- UI Layout ---
+st.markdown(f"<h1 style='text-align: center;'>{TEXT['title'][lang]}</h1>", unsafe_allow_html=True)
 
 with stylable_container("exchange_box", css_styles="padding: 1rem; background-color: #f9f9f9; border-radius: 1rem; margin-bottom: 1rem;"):
     exchange_rate = st.number_input(TEXT["exchange_rate"][lang], value=89000, step=1000)
@@ -199,4 +190,4 @@ with col1:
 
 with col2:
     if st.button("🔄 Refresh"):
-        st.experimental_rerun()
+        raise RerunException(rerun())
