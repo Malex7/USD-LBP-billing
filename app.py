@@ -121,7 +121,7 @@ st.markdown(f"""
 with stylable_container(key="exchange_box", css="padding: 1rem; background-color: #f9f9f9; border-radius: 1rem; margin-bottom: 1rem;"):
     exchange_rate = st.number_input(TEXT["exchange_rate"][lang], value=89000, step=1000)
 
-with stylable_container(key="bill_box", css="padding: 1rem; background-color: #f0f4ff; border-radius: 1rem; margin-bottom: 1rem;"):
+with stylable_container(key="currency_box", css="padding: 1rem; background-color: #f0f4ff; border-radius: 1rem; margin-bottom: 1rem;"):
     currency = st.selectbox(TEXT["currency_of_bill"][lang], ["USD", "LBP"])
     bill_amount = st.number_input(TEXT["total_bill"][lang], value=0.0, step=0.01)
 
@@ -145,8 +145,9 @@ if st.button(TEXT["calculate"][lang]):
         full_lbp = round(per_person_usd * exchange_rate)
         percentage = round((per_person_usd / bill_usd) * 100, 2) if bill_usd > 0 else 0
 
-        with stylable_container(key="split_box", css="padding: 1rem; background-color: #fef7e0; border-radius: 1rem; margin-top: 1rem;"):
+        with stylable_container(key="person_breakdown_box", css="padding: 1rem; background-color: #fef7e0; border-radius: 1rem; margin-top: 1rem;"):
             st.markdown(f"### 👥 {TEXT['per_person'][lang]}:")
             st.markdown(f"- 💵 **{per_usd} USD** and **{per_lbp:,} ل.ل**")
             st.markdown(f"- 📊 {TEXT['equivalent'][lang]}: **{full_lbp:,} ل.ل**")
             st.markdown(f"- 📊 {TEXT['share'][lang]}: **{percentage}%**")
+
