@@ -185,4 +185,3 @@ with col1:
                 else:
                     st.markdown(f"- 💵 {format_currency(per_usd, 'USD')} and {format_currency(per_lbp, 'LBP')} (OR {format_currency(full_lbp, 'LBP')})")
                 st.markdown(f"- 📊 {TEXT['share'][lang]}: **{percentage}%**")
-
