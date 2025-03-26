@@ -121,11 +121,11 @@ st.markdown(f"""
 with stylable_container(key="exchange_box", css="padding: 1rem; background-color: #f9f9f9; border-radius: 1rem; margin-bottom: 1rem;"):
     exchange_rate = st.number_input(TEXT["exchange_rate"][lang], value=89000, step=1000)
 
-with stylable_container("bill_info", css="padding: 1rem; background-color: #f0f4ff; border-radius: 1rem; margin-bottom: 1rem;"):
+with stylable_container(key="bill_info", css="padding: 1rem; background-color: #f0f4ff; border-radius: 1rem; margin-bottom: 1rem;"):
     currency = st.selectbox(TEXT["currency_of_bill"][lang], ["USD", "LBP"])
     bill_amount = st.number_input(TEXT["total_bill"][lang], value=0.0, step=0.01)
 
-with stylable_container("payment_info", css="padding: 1rem; background-color: #fff0f0; border-radius: 1rem; margin-bottom: 1rem;"):
+with stylable_container(key="payment_info", css="padding: 1rem; background-color: #fff0f0; border-radius: 1rem; margin-bottom: 1rem;"):
     paid_usd = st.number_input(TEXT["paid_usd"][lang], value=0.0, step=0.01)
     paid_lbp = st.number_input(TEXT["paid_lbp"][lang], value=0.0, step=1000.0)
     split_people = st.number_input(TEXT["split_people"][lang], min_value=0, value=0, step=1)
@@ -135,7 +135,7 @@ bill_usd = bill_amount if currency == "USD" else bill_amount / exchange_rate
 if st.button(TEXT["calculate"][lang]):
     result, remaining_usd = calculate_split_change(bill_usd, paid_usd, paid_lbp, exchange_rate)
 
-    with stylable_container("result_box", css="padding: 1rem; background-color: #eafbe7; border-radius: 1rem; margin-top: 1rem;"):
+    with stylable_container(key="result_box", css="padding: 1rem; background-color: #eafbe7; border-radius: 1rem; margin-top: 1rem;"):
         st.markdown(f"### 💡 {TEXT['result'][lang]}:\n{result}")
 
     if split_people > 0 and remaining_usd != 0:
@@ -145,7 +145,7 @@ if st.button(TEXT["calculate"][lang]):
         full_lbp = round(per_person_usd * exchange_rate)
         percentage = round((per_person_usd / bill_usd) * 100, 2) if bill_usd > 0 else 0
 
-        with stylable_container("split_result", css="padding: 1rem; background-color: #fef7e0; border-radius: 1rem; margin-top: 1rem;"):
+        with stylable_container(key="split_result", css="padding: 1rem; background-color: #fef7e0; border-radius: 1rem; margin-top: 1rem;"):
             st.markdown(f"### 👥 {TEXT['per_person'][lang]}:")
             st.markdown(f"- 💵 **{per_usd} USD** and **{per_lbp:,} ل.ل**")
             st.markdown(f"- 📊 {TEXT['equivalent'][lang]}: **{full_lbp:,} ل.ل**")
