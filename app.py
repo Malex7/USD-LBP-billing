@@ -23,7 +23,7 @@ TEXT = {
     "exchange_rate": {
         "English": "Exchange rate (LBP per 1 USD)",
         "Français": "Taux de change (LBP pour 1 USD)",
-        "العربية": "سعر الصرف (ل ل مقابل 1 دولار)"
+        "العربية": "سعر الصرف (ل.ل مقابل 1 دولار)"
     },
     "currency_of_bill": {
         "English": "Currency of the bill",
@@ -138,7 +138,7 @@ if st.button(TEXT["calculate"][lang], key="calculate_button"):
     with stylable_container(key="result_box", css="padding: 1rem; background-color: #eafbe7; border-radius: 1rem; margin-top: 1rem;"):
         st.markdown(f"### 💡 {TEXT['result'][lang]}:\n{result}")
 
-    if split_people > 0 and remaining_usd != 0:
+    if split_people > 0:
         per_person_usd = abs(remaining_usd) / split_people
         per_usd = int(per_person_usd)
         per_lbp = round((per_person_usd - per_usd) * exchange_rate)
