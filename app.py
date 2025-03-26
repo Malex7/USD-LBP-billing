@@ -1,5 +1,4 @@
 import streamlit as st
-from streamlit_extras.switch_page_button import switch_page
 from streamlit_extras.stylable_container import stylable_container
 
 st.set_page_config(page_title="USD/LBP Calculator", page_icon="💵", layout="centered")
@@ -60,4 +59,3 @@ if st.button("🧮 Calculate"):
         with stylable_container("split_result", css="padding: 1rem; background-color: #fef7e0; border-radius: 1rem; margin-top: 1rem;"):
             st.markdown("### 👥 Per Person:")
             st.markdown(f"- **{per_usd} USD** and **{per_lbp:,} LBP**  \n**OR {full_lbp:,} LBP**")
-
