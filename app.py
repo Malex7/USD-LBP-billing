@@ -1,7 +1,7 @@
 import streamlit as st
 from streamlit_extras.stylable_container import stylable_container
 
-st.set_page_config(page_title="USD/LBP Calculator", page_icon="💵", layout="centered")
+st.set_page_config(page_title="USD/LBP Calculator", page_icon="💵", layout="wide")
 
 # --- Calculation logic ---
 def calculate_split_change(bill_usd, paid_usd, paid_lbp, exchange_rate):
@@ -13,12 +13,12 @@ def calculate_split_change(bill_usd, paid_usd, paid_lbp, exchange_rate):
         owed_usd = abs(difference_usd)
         usd_owed = int(owed_usd)
         lbp_owed = round((owed_usd - usd_owed) * exchange_rate)
-        result = f"❌ Customer still owes:\n\n- **${usd_owed}** and **{lbp_owed:,.0f} L.L**  \n**OR {round(owed_usd * exchange_rate):,} L.L**"
+        result = f"❌ Customer still owes:\n\n- **${usd_owed}** and **{lbp_owed:,.0f} ل ل**  \n**OR {round(owed_usd * exchange_rate):,} ل ل**"
         return result, owed_usd
     elif difference_usd > 0:
         usd_return = int(difference_usd)
         lbp_return = round((difference_usd - usd_return) * exchange_rate)
-        result = f"✅ Change to return:\n\n- **${usd_return}** and **{lbp_return:,.0f} L.L**  \n**OR {round(difference_usd * exchange_rate):,} L.L**"
+        result = f"✅ Change to return:\n\n- **${usd_return}** and **{lbp_return:,.0f} ل ل**  \n**OR {round(difference_usd * exchange_rate):,} ل ل**"
         return result, -difference_usd
     else:
         result = "✅ **Payment is exact. No change owed.**"
@@ -68,7 +68,7 @@ with stylable_container(
 # --- Conversion logic ---
 bill_usd = bill_amount if currency == "USD" else bill_amount / exchange_rate
 
-if st.button("🧲 Calculate"):
+if bill_amount > 0 and st.button("🧲 Calculate"):
     result, remaining_usd = calculate_split_change(bill_usd, paid_usd, paid_lbp, exchange_rate)
 
     with stylable_container(
@@ -87,6 +87,7 @@ if st.button("🧲 Calculate"):
         per_usd = int(per_person_usd)
         per_lbp = round((per_person_usd - per_usd) * exchange_rate)
         full_lbp = round(per_person_usd * exchange_rate)
+        percentage = round((per_person_usd / bill_usd) * 100, 1) if bill_usd else 0
 
         with stylable_container(
             key="split_result",
@@ -97,6 +98,7 @@ if st.button("🧲 Calculate"):
                 margin-top: 1rem;
             """
         ):
-            st.markdown("### 👥 Per Person:")
-            st.markdown(f"- **${per_usd}** and **{per_lbp:,.0f} L.L**  \n**OR {full_lbp:,.0f} L.L**")
+            st.markdown("### 👥 Per Person Breakdown")
+            st.markdown(f"- 💵 Owes: **${per_usd}** and **{per_lbp:,.0f} ل ل**  \n- 📊 Share of bill: **{percentage}%**  \n- 📃 Total LBP equivalent: **{full_lbp:,.0f} ل ل**")
+
 
