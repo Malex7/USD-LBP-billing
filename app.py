@@ -13,12 +13,12 @@ def calculate_split_change(bill_usd, paid_usd, paid_lbp, exchange_rate):
         owed_usd = abs(difference_usd)
         usd_owed = int(owed_usd)
         lbp_owed = round((owed_usd - usd_owed) * exchange_rate)
-        result = f"❌ Customer still owes:\n\n- **{usd_owed} USD** and **{lbp_owed:,} LBP**  \n**OR {round(owed_usd * exchange_rate):,} LBP**"
+        result = f"❌ Customer still owes:\n\n- **${usd_owed}** and **{lbp_owed:,.0f} L.L**  \n**OR {round(owed_usd * exchange_rate):,} L.L**"
         return result, owed_usd
     elif difference_usd > 0:
         usd_return = int(difference_usd)
         lbp_return = round((difference_usd - usd_return) * exchange_rate)
-        result = f"✅ Change to return:\n\n- **{usd_return} USD** and **{lbp_return:,} LBP**  \n**OR {round(difference_usd * exchange_rate):,} LBP**"
+        result = f"✅ Change to return:\n\n- **${usd_return}** and **{lbp_return:,.0f} L.L**  \n**OR {round(difference_usd * exchange_rate):,} L.L**"
         return result, -difference_usd
     else:
         result = "✅ **Payment is exact. No change owed.**"
@@ -35,7 +35,7 @@ with stylable_container(
         padding: 1rem;
         background-color: #f9f9f9;
         border-radius: 1rem;
-        margin-bottom: 1rem;
+        margin-bottom: 1.5rem;
     """
 ):
     exchange_rate = st.number_input("💱 Exchange rate (LBP per 1 USD)", value=89000, step=1000)
@@ -44,9 +44,9 @@ with stylable_container(
     key="bill_info",
     css_styles="""
         padding: 1rem;
-        background-color: #f0f4ff;
+        background-color: #ddeaff;
         border-radius: 1rem;
-        margin-bottom: 1rem;
+        margin-bottom: 1.5rem;
     """
 ):
     currency = st.selectbox("🧾 Currency of the bill", ["USD", "LBP"])
@@ -56,9 +56,9 @@ with stylable_container(
     key="payment_info",
     css_styles="""
         padding: 1rem;
-        background-color: #fff0f0;
+        background-color: #ffd6d6;
         border-radius: 1rem;
-        margin-bottom: 1rem;
+        margin-bottom: 1.5rem;
     """
 ):
     paid_usd = st.number_input("💵 Paid in USD", value=0.0, min_value=0.0, step=0.01)
@@ -68,14 +68,14 @@ with stylable_container(
 # --- Conversion logic ---
 bill_usd = bill_amount if currency == "USD" else bill_amount / exchange_rate
 
-if st.button("🧮 Calculate"):
+if st.button("🧲 Calculate"):
     result, remaining_usd = calculate_split_change(bill_usd, paid_usd, paid_lbp, exchange_rate)
 
     with stylable_container(
         key="result_box",
         css_styles="""
             padding: 1rem;
-            background-color: #eafbe7;
+            background-color: #c3f7c3;
             border-radius: 1rem;
             margin-top: 1rem;
         """
@@ -92,11 +92,11 @@ if st.button("🧮 Calculate"):
             key="split_result",
             css_styles="""
                 padding: 1rem;
-                background-color: #fef7e0;
+                background-color: #fff1b8;
                 border-radius: 1rem;
                 margin-top: 1rem;
             """
         ):
             st.markdown("### 👥 Per Person:")
-            st.markdown(f"- **{per_usd} USD** and **{per_lbp:,} LBP**  \n**OR {full_lbp:,} LBP**")
+            st.markdown(f"- **${per_usd}** and **{per_lbp:,.0f} L.L**  \n**OR {full_lbp:,.0f} L.L**")
 
