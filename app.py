@@ -1,38 +1,51 @@
-if st.button("Calculate"):
-    result, usd_owed, lbp_owed = calculate_split_change(bill_usd, paid_usd, paid_lbp, exchange_rate)
-    st.markdown("### Result:")
+import streamlit as st
 
-    if usd_owed == 0 and lbp_owed == 0:
-        st.markdown(result)
+def calculate_split_change(bill_usd, paid_usd, paid_lbp, exchange_rate):
+    paid_lbp_usd = paid_lbp / exchange_rate
+    total_paid_usd = paid_usd + paid_lbp_usd
+    difference_usd = round(total_paid_usd - bill_usd, 2)
+
+    if difference_usd < 0:
+        owed_usd = abs(difference_usd)
+        usd_owed = int(owed_usd)
+        lbp_owed = round((owed_usd - usd_owed) * exchange_rate)
+
+        result = f"❌ Customer still owes:\n\n- **{usd_owed} USD** and **{lbp_owed:,} LBP**  \n**OR {round(owed_usd * exchange_rate):,} LBP**"
+        return result, owed_usd
+    elif difference_usd > 0:
+        usd_return = int(difference_usd)
+        lbp_return = round((difference_usd - usd_return) * exchange_rate)
+
+        result = f"✅ Change to return:\n\n- **{usd_return} USD** and **{lbp_return:,} LBP**  \n**OR {round(difference_usd * exchange_rate):,} LBP**"
+        return result, -difference_usd
     else:
-        usd_to_lbp = usd_owed * exchange_rate
-        total_lbp = int(usd_to_lbp + lbp_owed)
+        result = "✅ **Payment is exact. No change owed.**"
+        return result, 0.0
 
-        line_parts = []
-        if usd_owed > 0:
-            line_parts.append(f"**{usd_owed} USD**")
-        if lbp_owed > 0:
-            line_parts.append(f"**{lbp_owed:,} LBP**")
-        
-        owed_line = " and ".join(line_parts)
-        st.markdown(f"- {owed_line}  **OR {total_lbp:,} LBP**")
+# Streamlit UI
+st.title("💵 USD/LBP Payment Calculator")
 
-    # Per person section
-    if split_between > 1 and (usd_owed != 0 or lbp_owed != 0):
+exchange_rate = st.number_input("Exchange rate (LBP per 1 USD)", value=89000)
+currency = st.selectbox("Currency of the bill", ["USD", "LBP"])
+bill_amount = st.number_input("Total bill amount", value=0.0, min_value=0.0)
+paid_usd = st.number_input("Paid in USD", value=0.0, min_value=0.0)
+paid_lbp = st.number_input("Paid in LBP", value=0.0, min_value=0.0)
+split_people = st.number_input("Split between how many people?", min_value=0, value=0, step=1)
+
+if currency == "USD":
+    bill_usd = bill_amount
+else:
+    bill_usd = bill_amount / exchange_rate
+
+if st.button("Calculate"):
+    result, remaining_usd = calculate_split_change(bill_usd, paid_usd, paid_lbp, exchange_rate)
+    st.markdown(f"### Result:\n{result}")
+
+    if split_people > 0 and remaining_usd != 0:
+        per_person_usd = abs(remaining_usd) / split_people
+        per_usd = int(per_person_usd)
+        per_lbp = round((per_person_usd - per_usd) * exchange_rate)
+        full_lbp = round(per_person_usd * exchange_rate)
+
         st.markdown("### Per Person:")
-
-        total_owed_usd = abs(usd_owed)
-        total_owed_lbp = abs(lbp_owed)
-        per_person_usd_float = total_owed_usd / split_between
-        usd_part = int(per_person_usd_float)
-        lbp_part = round((per_person_usd_float - usd_part) * exchange_rate + (total_owed_lbp / split_between))
-        per_person_lbp_total = round((total_owed_usd * exchange_rate + total_owed_lbp) / split_between)
-
-        pp_parts = []
-        if usd_part > 0:
-            pp_parts.append(f"**{usd_part} USD**")
-        if lbp_part > 0:
-            pp_parts.append(f"**{lbp_part:,} LBP**")
-
-        st.markdown(f"- {' and '.join(pp_parts)}  **OR {per_person_lbp_total:,} LBP**")
-
+        st.markdown(f"- **{per_usd} USD** and **{per_lbp:,} LBP**  \n**OR {full_lbp:,} LBP**")
