@@ -70,6 +70,16 @@ TEXT = {
         "Français": "Doit",
         "العربية": "ما يجب دفعه"
     },
+    "change_return": {
+        "English": "Change to return",
+        "Français": "Monnaie à rendre",
+        "العربية": "المبلغ المعاد"
+    },
+    "payment_exact": {
+        "English": "Payment is exact. No change owed.",
+        "Français": "Paiement exact. Pas de monnaie à rendre.",
+        "العربية": "الدفع مطابق. لا يوجد مبلغ معاد."
+    },
     "share": {
         "English": "Share of bill",
         "Français": "Part de la facture",
@@ -82,14 +92,62 @@ TEXT = {
     }
 }
 
-# Now this dictionary can be used in the rest of your interface like:
-# st.number_input(TEXT["exchange_rate"][lang], ...)
-# This replaces all static text with language-aware labels.
+# --- Calculation logic ---
+def calculate_split_change(bill_usd, paid_usd, paid_lbp, exchange_rate):
+    paid_lbp_usd = paid_lbp / exchange_rate
+    total_paid_usd = paid_usd + paid_lbp_usd
+    difference_usd = round(total_paid_usd - bill_usd, 2)
 
-# When rendering per-person info, use:
-# st.markdown(f"- 💵 {TEXT['equivalent'][lang]}: ...")
-# st.markdown(f"- 📊 {TEXT['share'][lang]}: ...")
-# So LBP total appears before percentage as requested.
+    if difference_usd < 0:
+        owed_usd = abs(difference_usd)
+        usd_owed = int(owed_usd)
+        lbp_owed = round((owed_usd - usd_owed) * exchange_rate)
+        result = f"❌ {TEXT['owes'][lang]}:\n\n- **{usd_owed} USD** and **{lbp_owed:,} ل.ل**  \n**OR {round(owed_usd * exchange_rate):,} ل.ل**"
+        return result, owed_usd
+    elif difference_usd > 0:
+        usd_return = int(difference_usd)
+        lbp_return = round((difference_usd - usd_return) * exchange_rate)
+        result = f"✅ {TEXT['change_return'][lang]}:\n\n- **{usd_return} USD** and **{lbp_return:,} ل.ل**  \n**OR {round(difference_usd * exchange_rate):,} ل.ل**"
+        return result, -difference_usd
+    else:
+        result = f"✅ **{TEXT['payment_exact'][lang]}**"
+        return result, 0.0
 
-# ✅ You can now keep the Calculate button active even if bill = 0.
+# --- UI Layout ---
+st.markdown(f"""
+    <h1 style='text-align: center;'>{TEXT['title'][lang]}</h1>
+""", unsafe_allow_html=True)
+
+with stylable_container("exchange_box", css="padding: 1rem; background-color: #f9f9f9; border-radius: 1rem; margin-bottom: 1rem;"):
+    exchange_rate = st.number_input(TEXT["exchange_rate"][lang], value=89000, step=1000)
+
+with stylable_container("bill_info", css="padding: 1rem; background-color: #f0f4ff; border-radius: 1rem; margin-bottom: 1rem;"):
+    currency = st.selectbox(TEXT["currency_of_bill"][lang], ["USD", "LBP"])
+    bill_amount = st.number_input(TEXT["total_bill"][lang], value=0.0, step=0.01)
+
+with stylable_container("payment_info", css="padding: 1rem; background-color: #fff0f0; border-radius: 1rem; margin-bottom: 1rem;"):
+    paid_usd = st.number_input(TEXT["paid_usd"][lang], value=0.0, step=0.01)
+    paid_lbp = st.number_input(TEXT["paid_lbp"][lang], value=0.0, step=1000.0)
+    split_people = st.number_input(TEXT["split_people"][lang], min_value=0, value=0, step=1)
+
+bill_usd = bill_amount if currency == "USD" else bill_amount / exchange_rate
+
+if st.button(TEXT["calculate"][lang]):
+    result, remaining_usd = calculate_split_change(bill_usd, paid_usd, paid_lbp, exchange_rate)
+
+    with stylable_container("result_box", css="padding: 1rem; background-color: #eafbe7; border-radius: 1rem; margin-top: 1rem;"):
+        st.markdown(f"### 💡 {TEXT['result'][lang]}:\n{result}")
+
+    if split_people > 0 and remaining_usd != 0:
+        per_person_usd = abs(remaining_usd) / split_people
+        per_usd = int(per_person_usd)
+        per_lbp = round((per_person_usd - per_usd) * exchange_rate)
+        full_lbp = round(per_person_usd * exchange_rate)
+        percentage = round((per_person_usd / bill_usd) * 100, 2) if bill_usd > 0 else 0
+
+        with stylable_container("split_result", css="padding: 1rem; background-color: #fef7e0; border-radius: 1rem; margin-top: 1rem;"):
+            st.markdown(f"### 👥 {TEXT['per_person'][lang]}:")
+            st.markdown(f"- 💵 **{per_usd} USD** and **{per_lbp:,} ل.ل**")
+            st.markdown(f"- 📊 {TEXT['equivalent'][lang]}: **{full_lbp:,} ل.ل**")
+            st.markdown(f"- 📊 {TEXT['share'][lang]}: **{percentage}%**")
 
